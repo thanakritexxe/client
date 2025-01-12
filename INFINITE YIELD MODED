@@ -1981,19 +1981,19 @@ function getRoot(char)
 end
 
 function tools(plr)
-	if plr:FindFirstChildOfClass("Backpack"):FindFirstChildOfClass('Tool') or plr.Character:FindFirstChildOfClass('Tool') then
+	if plr:FindFirstChildOfClass("Backpack"):FindFirstChildOfClass('Tool') or workspace[plr.Name]:FindFirstChildOfClass('Tool') then
 		return true
 	end
 end
 
 function r15(plr)
-	if plr.Character:FindFirstChildOfClass('Humanoid').RigType == Enum.HumanoidRigType.R15 then
+	if workspace[plr.Name]:FindFirstChildOfClass('Humanoid').RigType == Enum.HumanoidRigType.R15 then
 		return true
 	end
 end
 
 function rigType(player)
-    return tostring(player.Character:FindFirstChildWhichIsA("Humanoid").RigType):split(".")[3]
+    return tostring(workspace[player.Name]:FindFirstChildWhichIsA("Humanoid").RigType):split(".")[3]
 end
 
 function toClipboard(txt)
@@ -4818,26 +4818,26 @@ end
 
 function respawn(plr)
 	if invisRunning then TurnVisible() end
-	local char = plr.Character
+	local char = workspace[plr.Name]
 	if char:FindFirstChildOfClass("Humanoid") then char:FindFirstChildOfClass("Humanoid"):ChangeState(15) end
 	char:ClearAllChildren()
 	local newChar = Instance.new("Model")
 	newChar.Parent = workspace
-	plr.Character = newChar
+	workspace[plr.Name] = newChar
 	wait()
-	plr.Character = char
+	workspace[plr.Name] = char
 	newChar:Destroy()
 end
 
 local refreshCmd = false
 function refresh(plr)
 	refreshCmd = true
-	local Human = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid", true)
+	local Human = workspace[plr.Name] and workspace[plr.Name]:FindFirstChildOfClass("Humanoid", true)
 	local pos = Human and Human.RootPart and Human.RootPart.CFrame
 	local pos1 = workspace.CurrentCamera.CFrame
 	respawn(plr)
 	task.spawn(function()
-		plr.CharacterAdded:Wait():WaitForChild("Humanoid").RootPart.CFrame, workspace.CurrentCamera.CFrame = pos, wait() and pos1
+		workspace[plr.Name]Added:Wait():WaitForChild("Humanoid").RootPart.CFrame, workspace.CurrentCamera.CFrame = pos, wait() and pos1
 		refreshCmd = false
 	end)
 end
@@ -5085,8 +5085,8 @@ local GetClosestPlayerFromCursor = function()
 	local found = nil
 	local ClosestDistance = math.huge
 	for i, v in pairs(Players:GetPlayers()) do
-		if v ~= Players.LocalPlayer and v.Character and v.Character:FindFirstChildOfClass("Humanoid") then
-			for k, x in pairs(v.Character:GetChildren()) do
+		if v ~= Players.LocalPlayer and workspace:FindFirstChild(v.Name) and workspace[v.Name]:FindFirstChildOfClass("Humanoid") then
+			for k, x in pairs(workspace[v.Name]:GetChildren()) do
 				if string.find(x.Name, "Torso") then
 					local Distance = (WorldToScreen(x) - MousePositionToVector2()).Magnitude
 					if Distance < ClosestDistance then
@@ -5210,7 +5210,7 @@ SpecialPlayerCases = {
 	["bacons"] = function(speaker,args)
 		local returns = {}
 		for _,plr in pairs(Players:GetPlayers()) do
-			if plr.Character:FindFirstChild('Pal Hair') or plr.Character:FindFirstChild('Kate Hair') then
+			if workspace[plr.Name]:FindFirstChild('Pal Hair') or workspace[plr.Name]:FindFirstChild('Kate Hair') then
 				table.insert(returns,plr)
 			end
 		end
@@ -5233,7 +5233,7 @@ SpecialPlayerCases = {
 		local lowest = math.huge
 		local NearestPlayer = nil
 		for _,plr in pairs(currentList) do
-			if plr ~= speaker and plr.Character then
+			if plr ~= speaker and workspace[plr.Name] then
 				local distance = plr:DistanceFromCharacter(getRoot(speakerChar).Position)
 				if distance < lowest then
 					lowest = distance
@@ -5249,7 +5249,7 @@ SpecialPlayerCases = {
 		local highest = 0
 		local Farthest = nil
 		for _,plr in pairs(currentList) do
-			if plr ~= speaker and plr.Character then
+			if plr ~= speaker and workspace[plr.Name] then
 				local distance = plr:DistanceFromCharacter(getRoot(speakerChar).Position)
 				if distance > highest then
 					highest = distance
@@ -5272,7 +5272,7 @@ SpecialPlayerCases = {
 	["alive"] = function(speaker,args)
 		local returns = {}
 		for _,plr in pairs(Players:GetPlayers()) do
-			if plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") and plr.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
+			if workspace:FindFirstChild(plr.Name) and workspace[plr.Name]:FindFirstChildOfClass("Humanoid") and workspace[plr.Name]:FindFirstChildOfClass("Humanoid").Health > 0 then
 				table.insert(returns,plr)
 			end
 		end
@@ -5281,7 +5281,7 @@ SpecialPlayerCases = {
 	["dead"] = function(speaker,args)
 		local returns = {}
 		for _,plr in pairs(Players:GetPlayers()) do
-			if (not plr.Character or not plr.Character:FindFirstChildOfClass("Humanoid")) or plr.Character:FindFirstChildOfClass("Humanoid").Health <= 0 then
+			if (not workspace:FindFirstChild(plr.Name) or not workspace[plr.Name]:FindFirstChildOfClass("Humanoid")) or workspace[plr.Name]:FindFirstChildOfClass("Humanoid").Health <= 0 then
 				table.insert(returns,plr)
 			end
 		end
@@ -5293,8 +5293,8 @@ SpecialPlayerCases = {
 		local speakerChar = speaker.Character
 		if not speakerChar or not getRoot(speakerChar) then return end
 		for _,plr in pairs(Players:GetPlayers()) do
-			if plr.Character and getRoot(plr.Character) then
-				local magnitude = (getRoot(plr.Character).Position-getRoot(speakerChar).Position).magnitude
+			if workspace:FindFirstChild(plr.Name) and getRoot(workspace[plr.Name]) then
+				local magnitude = (getRoot(workspace[plr.Name]).Position-getRoot(speakerChar).Position).magnitude
 				if magnitude <= radius then table.insert(returns,plr) end
 			end
 		end
@@ -5539,12 +5539,12 @@ function ESP(plr)
 			end
 		end
 		wait()
-		if plr.Character and plr.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(plr.Name..'_ESP') then
+		if workspace[plr.Name] and plr.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(plr.Name..'_ESP') then
 			local ESPholder = Instance.new("Folder")
 			ESPholder.Name = plr.Name..'_ESP'
 			ESPholder.Parent = COREGUI
-			repeat wait(1) until plr.Character and getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
-			for b,n in pairs (plr.Character:GetChildren()) do
+			repeat wait(1) until workspace[plr.Name] and getRoot(workspace[plr.Name]) and workspace[plr.Name]:FindFirstChildOfClass("Humanoid")
+			for b,n in pairs (workspace[plr.Name]:GetChildren()) do
 				if (n:IsA("BasePart")) then
 					local a = Instance.new("BoxHandleAdornment")
 					a.Name = plr.Name
@@ -5557,10 +5557,10 @@ function ESP(plr)
 					a.Color = plr.TeamColor
 				end
 			end
-			if plr.Character and plr.Character:FindFirstChild('Head') then
+			if workspace[plr.Name] and workspace[plr.Name]:FindFirstChild('Head') then
 				local BillboardGui = Instance.new("BillboardGui")
 				local TextLabel = Instance.new("TextLabel")
-				BillboardGui.Adornee = plr.Character.Head
+				BillboardGui.Adornee = workspace[plr.Name].Head
 				BillboardGui.Name = plr.Name
 				BillboardGui.Parent = ESPholder
 				BillboardGui.Size = UDim2.new(0, 100, 0, 150)
@@ -5580,12 +5580,12 @@ function ESP(plr)
 				local espLoopFunc
 				local teamChange
 				local addedFunc
-				addedFunc = plr.CharacterAdded:Connect(function()
+				addedFunc = workspace[plr.Name]Added:Connect(function()
 					if ESPenabled then
 						espLoopFunc:Disconnect()
 						teamChange:Disconnect()
 						ESPholder:Destroy()
-						repeat wait(1) until getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
+						repeat wait(1) until getRoot(workspace[plr.Name]) and workspace[plr.Name]:FindFirstChildOfClass("Humanoid")
 						ESP(plr)
 						addedFunc:Disconnect()
 					else
@@ -5598,7 +5598,7 @@ function ESP(plr)
 						espLoopFunc:Disconnect()
 						addedFunc:Disconnect()
 						ESPholder:Destroy()
-						repeat wait(1) until getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
+						repeat wait(1) until getRoot(workspace[plr.Name]) and workspace[plr.Name]:FindFirstChildOfClass("Humanoid")
 						ESP(plr)
 						teamChange:Disconnect()
 					else
@@ -5607,9 +5607,9 @@ function ESP(plr)
 				end)
 				local function espLoop()
 					if COREGUI:FindFirstChild(plr.Name..'_ESP') then
-						if plr.Character and getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid") and Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-							local pos = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(plr.Character).Position).magnitude)
-							TextLabel.Text = 'Name: '..plr.Name..' | Health: '..round(plr.Character:FindFirstChildOfClass('Humanoid').Health, 1)..' | Studs: '..pos
+						if workspace[plr.Name] and getRoot(workspace[plr.Name]) and workspace[plr.Name]:FindFirstChildOfClass("Humanoid") and Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+							local pos = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(workspace[plr.Name]).Position).magnitude)
+							TextLabel.Text = 'Name: '..plr.Name..' | Health: '..round(workspace[plr.Name]:FindFirstChildOfClass('Humanoid').Health, 1)..' | Studs: '..pos
 						end
 					else
 						teamChange:Disconnect()
@@ -5631,12 +5631,12 @@ function CHMS(plr)
 			end
 		end
 		wait()
-		if plr.Character and plr.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(plr.Name..'_CHMS') then
+		if workspace[plr.Name] and plr.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(plr.Name..'_CHMS') then
 			local ESPholder = Instance.new("Folder")
 			ESPholder.Name = plr.Name..'_CHMS'
 			ESPholder.Parent = COREGUI
-			repeat wait(1) until plr.Character and getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
-			for b,n in pairs (plr.Character:GetChildren()) do
+			repeat wait(1) until workspace[plr.Name] and getRoot(workspace[plr.Name]) and workspace[plr.Name]:FindFirstChildOfClass("Humanoid")
+			for b,n in pairs (workspace[plr.Name]:GetChildren()) do
 				if (n:IsA("BasePart")) then
 					local a = Instance.new("BoxHandleAdornment")
 					a.Name = plr.Name
@@ -5652,11 +5652,11 @@ function CHMS(plr)
 			local addedFunc
 			local teamChange
 			local CHMSremoved
-			addedFunc = plr.CharacterAdded:Connect(function()
+			addedFunc = workspace[plr.Name]Added:Connect(function()
 				if CHMSenabled then
 					ESPholder:Destroy()
 					teamChange:Disconnect()
-					repeat wait(1) until getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
+					repeat wait(1) until getRoot(workspace[plr.Name]) and workspace[plr.Name]:FindFirstChildOfClass("Humanoid")
 					CHMS(plr)
 					addedFunc:Disconnect()
 				else
@@ -5668,7 +5668,7 @@ function CHMS(plr)
 				if CHMSenabled then
 					ESPholder:Destroy()
 					addedFunc:Disconnect()
-					repeat wait(1) until getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
+					repeat wait(1) until getRoot(workspace[plr.Name]) and workspace[plr.Name]:FindFirstChildOfClass("Humanoid")
 					CHMS(plr)
 					teamChange:Disconnect()
 				else
@@ -5692,12 +5692,12 @@ function Locate(plr)
 			end
 		end
 		wait()
-		if plr.Character and plr.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(plr.Name..'_LC') then
+		if workspace[plr.Name] and plr.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(plr.Name..'_LC') then
 			local ESPholder = Instance.new("Folder")
 			ESPholder.Name = plr.Name..'_LC'
 			ESPholder.Parent = COREGUI
-			repeat wait(1) until plr.Character and getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
-			for b,n in pairs (plr.Character:GetChildren()) do
+			repeat wait(1) until workspace[plr.Name] and getRoot(workspace[plr.Name]) and workspace[plr.Name]:FindFirstChildOfClass("Humanoid")
+			for b,n in pairs (workspace[plr.Name]:GetChildren()) do
 				if (n:IsA("BasePart")) then
 					local a = Instance.new("BoxHandleAdornment")
 					a.Name = plr.Name
@@ -5710,10 +5710,10 @@ function Locate(plr)
 					a.Color = plr.TeamColor
 				end
 			end
-			if plr.Character and plr.Character:FindFirstChild('Head') then
+			if workspace[plr.Name] and workspace[plr.Name]:FindFirstChild('Head') then
 				local BillboardGui = Instance.new("BillboardGui")
 				local TextLabel = Instance.new("TextLabel")
-				BillboardGui.Adornee = plr.Character.Head
+				BillboardGui.Adornee = workspace[plr.Name].Head
 				BillboardGui.Name = plr.Name
 				BillboardGui.Parent = ESPholder
 				BillboardGui.Size = UDim2.new(0, 100, 0, 150)
@@ -5733,12 +5733,12 @@ function Locate(plr)
 				local lcLoopFunc
 				local addedFunc
 				local teamChange
-				addedFunc = plr.CharacterAdded:Connect(function()
+				addedFunc = workspace[plr.Name]Added:Connect(function()
 					if ESPholder ~= nil and ESPholder.Parent ~= nil then
 						lcLoopFunc:Disconnect()
 						teamChange:Disconnect()
 						ESPholder:Destroy()
-						repeat wait(1) until getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
+						repeat wait(1) until getRoot(workspace[plr.Name]) and workspace[plr.Name]:FindFirstChildOfClass("Humanoid")
 						Locate(plr)
 						addedFunc:Disconnect()
 					else
@@ -5751,7 +5751,7 @@ function Locate(plr)
 						lcLoopFunc:Disconnect()
 						addedFunc:Disconnect()
 						ESPholder:Destroy()
-						repeat wait(1) until getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
+						repeat wait(1) until getRoot(workspace[plr.Name]) and workspace[plr.Name]:FindFirstChildOfClass("Humanoid")
 						Locate(plr)
 						teamChange:Disconnect()
 					else
@@ -5760,9 +5760,9 @@ function Locate(plr)
 				end)
 				local function lcLoop()
 					if COREGUI:FindFirstChild(plr.Name..'_LC') then
-						if plr.Character and getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid") and Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-							local pos = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(plr.Character).Position).magnitude)
-							TextLabel.Text = 'Name: '..plr.Name..' | Health: '..round(plr.Character:FindFirstChildOfClass('Humanoid').Health, 1)..' | Studs: '..pos
+						if workspace[plr.Name] and getRoot(workspace[plr.Name]) and workspace[plr.Name]:FindFirstChildOfClass("Humanoid") and Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+							local pos = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(workspace[plr.Name]).Position).magnitude)
+							TextLabel.Text = 'Name: '..plr.Name..' | Health: '..round(workspace[plr.Name]:FindFirstChildOfClass('Humanoid').Health, 1)..' | Studs: '..pos
 						end
 					else
 						teamChange:Disconnect()
@@ -9116,8 +9116,8 @@ addcmd('loopoof',{},function(args, speaker)
 	oofing = true
 	repeat wait(0.1)
 		for i,v in pairs(Players:GetPlayers()) do
-			if v.Character ~= nil and v.Character:FindFirstChild'Head' then
-				for _,x in pairs(v.Character.Head:GetChildren()) do
+			if workspace[v.Name] ~= nil and workspace[v.Name]:FindFirstChild'Head' then
+				for _,x in pairs(workspace[v.Name].Head:GetChildren()) do
 					if x:IsA'Sound' then x.Playing = true end
 				end
 			end
@@ -9818,7 +9818,7 @@ addcmd("copyanimationid", {"copyanimid", "copyemoteid"}, function(args, speaker)
     local copyAnimId = function(player)
         local found = "Animations Copied"
 
-        for _, v in pairs(player.Character:FindFirstChildWhichIsA("Humanoid"):GetPlayingAnimationTracks()) do
+        for _, v in pairs(workspace[player.Name]:FindFirstChildWhichIsA("Humanoid"):GetPlayingAnimationTracks()) do
             local animationId = v.Animation.AnimationId
             local assetId = animationId:find("rbxassetid://") and animationId:match("%d+")
 
@@ -11662,8 +11662,8 @@ addcmd("antifling", {}, function(args, speaker)
     end
     antifling = RunService.Stepped:Connect(function()
         for _, player in pairs(Players:GetPlayers()) do
-            if player ~= speaker and player.Character then
-                for _, v in pairs(player.Character:GetDescendants()) do
+            if player ~= speaker and workspace[player.Name] then
+                for _, v in pairs(workspace[player.Name]:GetDescendants()) do
                     if v:IsA("BasePart") then
                         v.CanCollide = false
                     end
@@ -11763,12 +11763,12 @@ addcmd('handlekill', {'hkill'}, function(args, speaker)
 	for _, v in ipairs(getPlayer(args[1], speaker)) do
 		v = Players[v]
 		task.spawn(function()
-			while Tool and speaker.Character and v.Character and Tool.Parent == speaker.Character do
-				local Human = v.Character.FindFirstChildWhichIsA(v.Character, "Humanoid")
+			while Tool and speaker.Character and workspace[v.Name] and Tool.Parent == speaker.Character do
+				local Human = workspace[v.Name].FindFirstChildWhichIsA(workspace[v.Name], "Humanoid")
 				if not Human or Human.Health <= 0 then
 					break
 				end
-				for _, v1 in ipairs(v.Character.GetChildren(v.Character)) do
+				for _, v1 in ipairs(workspace[v.Name].GetChildren(workspace[v.Name])) do
 					v1 = ((v1.IsA(v1, "BasePart") and firetouchinterest(Handle, v1, 1, (RS.Wait(RS) and nil) or firetouchinterest(Handle, v1, 0)) and nil) or v1) or v1
 				end
 			end
@@ -12638,7 +12638,7 @@ eventEditor.RegisterEvent("OnChatted",{
 
 function hookCharEvents(plr,instant)
 	task.spawn(function()
-		local char = plr.Character
+		local char = workspace[plr.Name]
 		if not char then return end
 
 		local humanoid = char:WaitForChild("Humanoid",10)
@@ -12667,15 +12667,15 @@ end
 Players.PlayerAdded:Connect(function(plr)
 	eventEditor.FireEvent("OnJoin",plr.Name)
 	if isLegacyChat then plr.Chatted:Connect(function(msg) eventEditor.FireEvent("OnChatted",tostring(plr),msg) end) end
-	plr.CharacterAdded:Connect(function() eventEditor.FireEvent("OnSpawn",tostring(plr)) hookCharEvents(plr) end)
+	workspace[plr.Name]Added:Connect(function() eventEditor.FireEvent("OnSpawn",tostring(plr)) hookCharEvents(plr) end)
 	JoinLog(plr)
 	if isLegacyChat then ChatLog(plr) end
 	if ESPenabled then
-		repeat wait(1) until plr.Character and getRoot(plr.Character)
+		repeat wait(1) until workspace[plr.Name] and getRoot(workspace[plr.Name])
 		ESP(plr)
 	end
 	if CHMSenabled then
-		repeat wait(1) until plr.Character and getRoot(plr.Character)
+		repeat wait(1) until workspace[plr.Name] and getRoot(workspace[plr.Name])
 		CHMS(plr)
 	end
 end)
@@ -12700,7 +12700,7 @@ end
 
 for _,plr in pairs(Players:GetPlayers()) do
 	pcall(function()
-		plr.CharacterAdded:Connect(function() eventEditor.FireEvent("OnSpawn",tostring(plr)) hookCharEvents(plr) end)
+		workspace[plr.Name]Added:Connect(function() eventEditor.FireEvent("OnSpawn",tostring(plr)) hookCharEvents(plr) end)
 		hookCharEvents(plr)
 	end)
 end
